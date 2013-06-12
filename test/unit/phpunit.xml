@@ -1,0 +1,17 @@
+<phpunit
+    bootstrap="./bootstrap.php"
+    >
+    <testsuites>
+        <testsuite name="Oyez-PHP Test Suite">
+            <directory>./OyezTest</directory>
+        </testsuite>
+    </testsuites>
+    <logging>
+        <!--<log type="coverage-clover" target="./coverage.xml"/>-->
+    </logging>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">../../lib</directory>
+        </whitelist>
+    </filter>
+</phpunit>
