@@ -9,6 +9,9 @@ before_script:
 
 script: ./bin/phake test
 
+after_script:
+  - ./bin/phake coverage-upload
+
 branches:
   only:
     - master
