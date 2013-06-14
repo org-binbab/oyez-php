@@ -1,17 +1,19 @@
 <?php
 
+$PHP_BIN = defined('PHP_BINARY') ? constant('PHP_BINARY') . ' ' : '';
+
 desc("Run unit and integration tests");
-task('test', function(){
-    passthru('./bin/phpunit --configuration test/unit/phpunit.xml test/unit');
+task('test', function () use ($PHP_BIN) {
+    passthru($PHP_BIN . './bin/phpunit --configuration test/unit/phpunit.xml test/unit');
 });
 
-desc('test', "Preview coveralls report");
-task('coverage', function(){
-    passthru('./bin/coveralls --dry-run -v --ansi');
+desc("Preview coveralls report");
+task('coverage', 'test', function () use ($PHP_BIN) {
+    passthru($PHP_BIN . './bin/coveralls --dry-run -v --ansi');
 });
 
 desc("Upload coveralls report");
-task('coverage-upload', function(){
+task('coverage-upload', function () {
     if (stripos(phpversion(), '5.4.') === 0) {
         passthru('./bin/coveralls -v');
     } else {

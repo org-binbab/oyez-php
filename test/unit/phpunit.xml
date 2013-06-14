@@ -12,6 +12,9 @@
     <filter>
         <whitelist>
             <directory suffix=".php">../../lib</directory>
+            <exclude>
+                <directory suffix="Exception.php">../../lib</directory>
+            </exclude>
         </whitelist>
     </filter>
 </phpunit>
