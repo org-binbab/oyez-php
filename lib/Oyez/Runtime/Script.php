@@ -19,12 +19,7 @@ class Script
         $this->main = array();
     }
 
-    public function run()
-    {
-        return new Runner($this);
-    }
-
-    public function run_withContext($context)
+    public function run($context=null)
     {
         return new Runner($this, $context);
     }

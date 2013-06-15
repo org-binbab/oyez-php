@@ -1,6 +1,7 @@
 <?php
 namespace OyezTest\RuntimeTest;
 
+use Oyez\Common\Oyez;
 use Oyez\Runtime\Script;
 
 class InstructionTest extends \PHPUnit_Framework_TestCase
@@ -55,6 +56,18 @@ class InstructionTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testCallStaticMethodArgs()
+    {
+        Sample_Class::reset();
+        $main =& $this->script->main;
+        $main[] = array('call', 'OyezTest.RuntimeTest.Sample_Class.aStaticMethod', 'HELLO WORLD');
+        $run = $this->script->run();
+        $this->assertEquals(
+            'HELLO WORLD',
+            $run->vars['result']
+        );
+    }
+
     public function testCallMethod()
     {
         $main =& $this->script->main;
@@ -71,7 +84,35 @@ class InstructionTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testGetStaticValue()
+    public function testCallMethodArgs()
+    {
+        $main =& $this->script->main;
+        $main[] = array('new', 'OyezTest.RuntimeTest.Sample_Class');
+        $main[] = array('call', '$object.aMethod', 'HELLO WORLD');
+        $run = $this->script->run();
+        $this->assertEquals(
+            'HELLO WORLD',
+            $run->vars['result']
+        );
+    }
+
+    public function testGetConstant()
+    {
+        Sample_Class::reset();
+        $main =& $this->script->main;
+        $main[] = array('get', 'OyezTest.RuntimeTest.Sample_Class.A_CONSTANT');
+        $run = $this->script->run();
+        $this->assertEquals(
+            'a constant value',
+            $run->vars['value']
+        );
+        $this->assertEquals(
+            'a constant value',
+            $run->vars['last']
+        );
+    }
+
+    public function testGetStaticProperty()
     {
         Sample_Class::reset();
         $main =& $this->script->main;
@@ -87,7 +128,7 @@ class InstructionTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testGetValue()
+    public function testGetProperty()
     {
         $main =& $this->script->main;
         $main[] = array('new', 'OyezTest.RuntimeTest.Sample_Class');
@@ -130,6 +171,20 @@ class InstructionTest extends \PHPUnit_Framework_TestCase
         $run = $this->script->run();
         $this->assertEquals(
             'HELLO',
+            $run->vars['value']
+        );
+    }
+
+    public function testSetWithSubPath()
+    {
+        $main =& $this->script->main;
+        $main[] = array('new', 'OyezTest.RuntimeTest.Sample_Class');
+        $main[] = array('get', 'Oyez.Common.Oyez.VERSION');
+        $main[] = array('set', '$object.aProperty', '$last');
+        $main[] = array('get', '$object.aProperty');
+        $run = $this->script->run();
+        $this->assertEquals(
+            Oyez::VERSION,
             $run->vars['value']
         );
     }
