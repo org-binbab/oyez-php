@@ -21,10 +21,12 @@ class Banner_TextEdition extends SimpleEdition
     {
     }
 
+    /** @codeCoverageIgnore */
     protected function _field($field)
     {
     }
 
+    /** @codeCoverageIgnore */
     protected function _closed()
     {
     }
@@ -37,6 +39,7 @@ class Banner_TextEdition extends SimpleEdition
         $article = $this->article;
         $depth = min($this->article->getDepth(), count(self::$separator_depth_format));
 
+        $editor->indent_level = 0;
         $editor->write_line($editor->plain->separator(self::$separator_depth_format[$depth]));
         $editor->write_parLeft(' ' . $article->title . ' ');
         if ($article->sub_title) {

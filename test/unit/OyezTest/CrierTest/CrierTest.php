@@ -17,6 +17,11 @@ class CrierTest extends \PHPUnit_Framework_TestCase
         self::$crier_defaultWriter = '\Oyez\Media\Writer\LoopWriter';
     }
 
+    public static function tearDownAfterClass()
+    {
+        self::setUpBeforeClass();
+    }
+
     /** @var Crier */
     protected $crier;
 

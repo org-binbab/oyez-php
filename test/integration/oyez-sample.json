@@ -1,0 +1,49 @@
+{
+    "version": "0",
+    "main": [
+        [ "new", "\\Oyez\\Media\\Writer\\LoopWriter"],
+        [ "set", "$this.output", "$last"],
+
+        [ "new", "Oyez.Crier", null, "$this.output"],
+
+        [ "get", "Oyez.Common.Oyez.VERSION"],
+        [ "set", "$this.oyezVer", "$last"],
+
+        ["call", "$object.banner", "Welcome to Oyez", "$this.oyezVer"],
+        ["call", "$object.headline", "That was a banner."],
+        ["call", "$object.increaseDepth"],
+        ["call", "$object.banner", "This is a second level banner."],
+        ["call", "$object.decreaseDepth"],
+
+        ["call", "$object.headline", "This is a headline."],
+        ["call", "$object.increaseDepth"],
+        ["call", "$object.headline", "An indented headline."],
+        ["call", "$object.increaseDepth"],
+        ["call", "$object.headline", "2x indented headline."],
+        ["call", "$object.decreaseDepth"],
+        ["call", "$object.decreaseDepth"],
+
+        ["call", "$object.headline", "Events"],
+        [ "use", "Oyez.Crier.Article.Event"],
+        ["call", "$object.event", "Here is a success event.", "!Event.STATUS_SUCCESS"],
+        ["call", "$object.event", "Here is a failing event.", "!Event.STATUS_FAILURE"],
+        ["call", "$object.event", "Here is a warning event.", "!Event.STATUS_WARNING"],
+        ["call", "$object.event", "Here is a skipped event.", "!Event.STATUS_SKIPPED"],
+        ["call", "$object.event", "Here is an event with sub-events.", null],
+        ["call", "$object.increaseDepth"],
+        ["call", "$object.event", "Sub event A", "!Event.STATUS_SUCCESS"],
+        ["call", "$object.event", "Sub event B", "!Event.STATUS_SUCCESS"],
+        ["call", "$object.decreaseDepth"],
+
+        ["call", "$object.headline", "Preformatted"],
+        ["call", "$object.preformatted", "Sample output",
+            "Here's some preformatted output:\nAlpha Bravo Charlie Delta Echo Foxtrot Golf Hotel India Juliet\n"
+        ],
+        ["call", "$object.event", "Here's some output following an event:", null],
+        ["call", "$object.increaseDepth"],
+        ["call", "$object.preformatted", "Event output",
+            "A B C D E F G H I J"
+        ],
+        ["call", "$object.decreaseDepth"]
+    ]
+}
