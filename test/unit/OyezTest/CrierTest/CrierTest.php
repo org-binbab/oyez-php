@@ -173,6 +173,37 @@ class CrierTest extends \PHPUnit_Framework_TestCase
         $this->crier->decreaseDepth();
     }
 
+    public function testGroup()
+    {
+        $crier = $this->crier;
+        $article1 = $crier->newArticle('ArticleFake', 'Test article 1');
+        $article1->fieldA = 'AAA';
+        $crier->group(function (Crier $crier) {
+            $article2 = $crier->newArticle('ArticleFake', 'Test article 2');
+            $article2->fieldA = 'BBB';
+            $crier->group(function (Crier $crier) {
+                $article3 = $crier->newArticle('ArticleFake', 'Test article 3');
+                $article3->fieldA = 'CCC';
+            });
+            $article4 = $crier->newArticle('ArticleFake', 'Test article 4');
+            $article4->fieldA = 'DDD';
+        });
+        $article5 = $crier->newArticle('ArticleFake', 'Test article 5');
+        $article5->fieldA = 'EEE';
+
+        $this->assertEquals(0, $crier->editor->articles[0]->{'getDepth'}());
+        $this->assertEquals(1, $crier->editor->articles[1]->{'getDepth'}());
+        $this->assertEquals(2, $crier->editor->articles[2]->{'getDepth'}());
+        $this->assertEquals(1, $crier->editor->articles[3]->{'getDepth'}());
+        $this->assertEquals(0, $crier->editor->articles[4]->{'getDepth'}());
+    }
+
+    public function testGroupInvalid()
+    {
+        $this->setExpectedException('Exception', 'invalid');
+        $this->crier->group(false);
+    }
+
     public function testDefaultEditorUnknown()
     {
         $this->setExpectedException('Exception', 'unknown class', Exception::NOT_FOUND);

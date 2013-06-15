@@ -19,13 +19,67 @@ use Oyez\Media\Editor;
 use Oyez\Media\Writer;
 
 /**
+ * Oyez Crier - Commonly used articles with simplified interface.
+ *
+ * Core articles include:
+ *  - Banner
+ *  - Event
+ *  - Headline
+ *  - Preformatted
+ *
  * @property-read Editor $editor
  * @property-read Writer $writer
  */
 class Crier extends Object
 {
+    /**
+     * Default class of Editor to use for Crier if not specified in the constructor.
+     * @api
+     *
+     * @var string
+     */
+    public static $default_editor_class      = '\Oyez\Media\Editor\TextEditor';
+
+    /**
+     * Default class of Writer to use for Crier if not specified in the constructor.
+     * @api
+     *
+     * @var string
+     */
+    public static $default_writer_class      = '\Oyez\Media\Writer\StandardWriter';
+
+    /**
+     * Namespace prefix for new articles whose class is given as a short name.
+     * This is the default value, it may also be set individually for each instance.
+     * @see $article_namespace
+     * @api
+     *
+     * @var string
+     */
+    public static $default_article_namespace = '\Oyez\Crier\Article';
+
+    // ----------------------------------------------------------------------------------
+
+    /**
+     * Namespace base to use when newArticle() is called with a short class name.
+     * @see newArticle()
+     * @api
+     *
+     * @var string
+     */
     public $article_namespace;
+
+    /**
+     * Automatically send buffer to writer on article updates.
+     * Buffer can be flushed manually via flushBuffer().
+     * @see flushBuffer()
+     * @api
+     *
+     * @var bool
+     */
     public $auto_flush_buffer = true;
+
+    // ----------------------------------------------------------------------------------
 
     /** @var Article */
     protected $_article_parent;
@@ -34,10 +88,17 @@ class Crier extends Object
     /** @var Writer */
     protected $_writer;
 
-    public static $default_editor_class = '\Oyez\Media\Editor\TextEditor';
-    public static $default_writer_class = '\Oyez\Media\Writer\StandardWriter';
-    public static $default_article_namespace = '\Oyez\Crier\Article';
+    // ----------------------------------------------------------------------------------
 
+    /**
+     * Create new Crier instance.
+     *
+     * Editor and Writer default to classes specified static configuration.
+     * @api
+     *
+     * @param Editor $editor
+     * @param Writer $writer
+     */
     public function __construct(Editor $editor=null, Writer $writer=null)
     {
         $this->article_namespace = static::$default_article_namespace;
@@ -57,6 +118,13 @@ class Crier extends Object
         }
     }
 
+    // ----------------------------------------------------------------------------------
+
+
+    //
+    // GETTERS & SETTERS
+    //////////////////////////////////////////////////////////////////////////////////////
+
     protected function __get_editor()
     {
         return $this->_editor;
@@ -67,7 +135,20 @@ class Crier extends Object
         return $this->_writer;
     }
 
+    // ----------------------------------------------------------------------------------
+
+
+    //
+    // ARTICLES
+    //////////////////////////////////////////////////////////////////////////////////////
+
     /**
+     * Create and return new article of given class name.
+     *
+     * If a short class is used it will be prefixed with the configured articled namespace.
+     * @see Crier::$default_article_namespace
+     * @api
+     *
      * @param string $article_class
      * @param string $title
      * @return Article
@@ -101,11 +182,115 @@ class Crier extends Object
         return $rClass->newInstance($title, $this->_editor, $this->_article_parent);
     }
 
-    public function importArticle(Article $article)
+    /**
+     * Banner (Article)
+     *
+     * A prominent header feature a title and optional sub title.
+     * @api
+     *
+     * @param string $banner
+     * @param string $sub_title
+     * @return Crier\Article\Banner
+     */
+    public function Banner($banner, $sub_title='')
     {
-        $article->editor = $this->_editor;
+        /** @var $banner Crier\Article\Banner */
+        $banner = $this->newArticle('Banner', $banner);
+        $banner->sub_title = $sub_title;
+        return $banner;
     }
 
+    /**
+     * Event (Article)
+     *
+     * A titled item with an associated (predefined) status.
+     * Status is required, but can be set null initially and supplied later.
+     *
+     * Available statuses defined in Event class as constants in the form:
+     *     Event::STATUS_*
+     *
+     * @see Event
+     * @api
+     *
+     * @param string $title
+     * @param int|null $status
+     * @return Event
+     */
+    public function Event($title, $status)
+    {
+        /** @var Event $event */
+        $event = $this->newArticle('Event', $title);
+        if (is_int($status)) {
+            $event->status = $status;
+        }
+        return $event;
+    }
+
+    /**
+     * Title (Article)
+     *
+     * A prominent header featuring only a title.
+     * @api
+     *
+     * @param string $title
+     * @return Crier\Article\Headline
+     */
+    public function Headline($title)
+    {
+        /** @var $headline Crier\Article\Headline */
+        $headline = $this->newArticle('Headline', $title);
+        return $headline;
+    }
+
+    /**
+     * Preformatted (Article)
+     *
+     * A block of text which will be displayed without modification.
+     * Whitespace is preserved.
+     * @api
+     *
+     * @param string $title
+     * @param string $content
+     * @return Preformatted
+     */
+    public function Preformatted($title, $content)
+    {
+        /** @var Preformatted $pre */
+        $pre = $this->newArticle('Preformatted', $title);
+        $pre->content = $content;
+        return $pre;
+    }
+
+    // TODO: Add report Article type.
+//    public function report($title, $status=null, $content=null)
+//    {
+//        /** @var $report Article\Report */
+//        $report = $this->newArticle('Report', $title);
+//        $report->status = $status;
+//        $report->content = $content;
+//        return $report;
+//    }
+
+    // ----------------------------------------------------------------------------------
+
+
+    //
+    // DEPTH MANAGEMENT
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Increase semantic depth of new articles.
+     *
+     * Works by assigning current open article as the parent of any new articles.
+     * Can be increased multiple times for deeper nesting.
+     * Any increase should have a matching decrease before the Crier ends.
+     * Consider using group() function when appropriate.
+     * @see decreaseDepth()
+     * @see group()
+     * @api
+     *
+     * @throws Crier\Exception
+     */
     public function increaseDepth()
     {
         $lastArticle = $this->_editor->article_getLastOpen();
@@ -115,6 +300,13 @@ class Crier extends Object
         $this->_article_parent = $lastArticle;
     }
 
+    /**
+     * Decrease semantic depth of new articles.
+     * @see increaseDepth()
+     * @api
+     *
+     * @throws Crier\Exception
+     */
     public function decreaseDepth()
     {
         $parent = $this->_article_parent;
@@ -125,54 +317,36 @@ class Crier extends Object
         $this->_article_parent = $parent->parent;
     }
 
-    public function banner($banner, $sub_title='')
+    /**
+     * A convenience function for increasing the depth of its sub-commands.
+     *
+     * Depth is automatically decreased afterwords. Can be nested.
+     * @see increaseDepth()
+     * @api
+     *
+     * @param callable $callable
+     * @throws Crier\Exception
+     */
+    public function group($callable)
     {
-        /** @var $banner Crier\Article\Banner */
-        $banner = $this->newArticle('Banner', $banner);
-        $banner->sub_title = $sub_title;
-        return $banner;
-    }
-
-    public function event($title, $status)
-    {
-        /** @var Event $event */
-        $event = $this->newArticle('Event', $title);
-        if (is_int($status)) {
-            $event->status = $status;
+        if ( ! is_callable($callable)) {
+            throw new Exception("Attempted to create group with invalid content.");
         }
-        return $event;
+        $this->increaseDepth();
+        call_user_func($callable, $this);
+        $this->decreaseDepth();
     }
 
-    public function headline($title)
-    {
-        /** @var $headline Crier\Article\Headline */
-        $headline = $this->newArticle('Headline', $title);
-        return $headline;
-    }
 
-    public function preformatted($title, $content)
-    {
-        /** @var Preformatted $pre */
-        $pre = $this->newArticle('Preformatted', $title);
-        $pre->content = $content;
-        return $pre;
-    }
+    //
+    // UTILITY
+    //////////////////////////////////////////////////////////////////////////////////////
 
-//    /**
-//     * @param $title
-//     * @param null $status
-//     * @param null $content
-//     * @return Crier\Article\Report
-//     */
-//    public function report($title, $status=null, $content=null)
-//    {
-//        /** @var $report Article\Report */
-//        $report = $this->newArticle('Report', $title);
-//        $report->status = $status;
-//        $report->content = $content;
-//        return $report;
-//    }
-
+    /**
+     * Manually flush buffer from Editor to Writer.
+     * @see $auto_flush_buffer
+     * @api
+     */
     public function flushBuffer()
     {
         while (( $buffer = $this->_editor->buffer_read() )) {
@@ -180,6 +354,25 @@ class Crier extends Object
         }
     }
 
+    /**
+     * Import article by assigning it the active editor.
+     * @internal
+     *
+     * @param Article $article
+     */
+    public function importArticle(Article $article)
+    {
+        $article->editor = $this->_editor;
+    }
+
+    /**
+     * Listener subscribed to Editor for updates.
+     * @internal
+     *
+     * @param $event_id
+     * @param Editor $editor
+     * @param $object
+     */
     public function _editor_callback($event_id, Editor $editor, $object)
     {
         switch ($event_id) {
@@ -191,6 +384,8 @@ class Crier extends Object
                 break;
         }
     }
+
+    // ----------------------------------------------------------------------------------
 
     protected function _getDefaultEditor()
     {
@@ -233,6 +428,8 @@ class Crier extends Object
 
         return $writer;
     }
+
+    // ----------------------------------------------------------------------------------
 
 }
 
